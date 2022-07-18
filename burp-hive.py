@@ -449,7 +449,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
             port = issue.getHttpService().getPort()
             # Add host
             self.addHostToHive(ip,hostname,port)
-            # Create issue as a record
+            # Create issue
             issue_data = [{
                 "nodeId":None,
                 "issueName": issue.getIssueName(),
@@ -764,12 +764,12 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
                    "Cookie": "SESSIONID={}".format(self.cookie)
                    }
         conn = httplib.HTTPConnection(self.ServerURL)
-        conn.request("GET", "/api/project", "" , headers)
+        conn.request("GET", "/api/groups/", "" , headers)
         response = conn.getresponse()
         if response.status == 200:
             respBody = response.read()
             print("OK: {}".format(respBody))
-            projects = json.loads(respBody)
+            projects = json.loads(respBody)["projects"]
             for prj in projects:
                 # print(prj["projectName"] + ":" + prj["projectId"])
                 self.projectName.addItem(prj["projectName"] + "~" + prj["projectId"])
