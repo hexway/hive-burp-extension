@@ -769,10 +769,15 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         if response.status == 200:
             respBody = response.read()
             print("OK: {}".format(respBody))
-            projects = json.loads(respBody)["projects"]
-            for prj in projects:
+            projects = json.loads(respBody)
+            for prj in projects["projects"]:
                 # print(prj["projectName"] + ":" + prj["projectId"])
                 self.projectName.addItem(prj["projectName"] + "~" + prj["projectId"])
+            for group in projects["children"]:
+                groupname = group["name"]
+                for prj in group["projects"]:
+                    # print(f"[{groupname}] - {prj['projectName']}")
+                    self.projectName.addItem("[" + groupname + "] - " + prj["projectName"]  + "~" + prj["projectId"])
         else:
             print("Something wrong: {}".format(response.status)) 
 
