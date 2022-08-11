@@ -24,7 +24,7 @@ Create issues in Hive, send requests and responses, sitemaps, etc.
 
 ## Demo
 
-Click on the image to see a demo video.
+Click on the image to see a demo video
 
 [![Watch the video](https://img.youtube.com/vi/1NIZj0D4zxQ/hqdefault.jpg)](https://youtu.be/1NIZj0D4zxQ)
 
