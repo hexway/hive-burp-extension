@@ -41,7 +41,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         CookieOpt.add(swing.JLabel("Token:         "))
         CookieOpt.add(swing.Box.createHorizontalStrut(10))
         ## cookie value
-        self.CookieField = swing.JTextField("SESSIONID cookie value",60)
+        self.CookieField = swing.JTextField("BSESSIONID cookie value",60)
         self.CookieField = swing.JTextField("06ffe688-fb5c-43f8-97d6-965e2785cf7a",60)
         CookieOpt.add(self.CookieField)
         CookieOpt.add(swing.Box.createHorizontalStrut(10))
@@ -399,7 +399,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
             issue_target[0]["ports"][0]["records"].append(issue_record)
             print(issue_target)
             headers = {"Content-Type": "application/json",
-                       "Cookie": "SESSIONID={}".format(self.cookie)
+                       "Cookie": "BSESSIONID={}".format(self.cookie)
                        }
             conn = httplib.HTTPConnection(self.ServerURL)
             conn.request("POST", "/api/project/{}/graph/api".format(self.activeProjectId), json.dumps(issue_target), headers)
@@ -421,7 +421,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
                 #               "nodeId":issueID}
                 #     ]
                 #     headers = {"Content-Type": "application/json",
-                #                "Cookie": "SESSIONID={}".format(self.cookie)
+                #                "Cookie": "BSESSIONID={}".format(self.cookie)
                 #                }
                 #     conn = httplib.HTTPConnection(self.ServerURL)
                 #     conn.request("POST", "/api/project/{}/graph/nodes".format(self.activeProjectId), json.dumps(req_data),
@@ -467,7 +467,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
             }]
             print(json.dumps(issue_data))
             headers = {"Content-Type": "application/json",
-                       "Cookie": "SESSIONID={}".format(self.cookie)
+                       "Cookie": "BSESSIONID={}".format(self.cookie)
                        }
             conn = httplib.HTTPConnection(self.ServerURL)
             conn.request("POST", "/api/project/{}/graph/nodes".format(self.activeProjectId), json.dumps(issue_data), headers)
@@ -487,7 +487,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
                               "nodeId":issueID}
                     ]
                     headers = {"Content-Type": "application/json",
-                               "Cookie": "SESSIONID={}".format(self.cookie)
+                               "Cookie": "BSESSIONID={}".format(self.cookie)
                                }
                     conn = httplib.HTTPConnection(self.ServerURL)
                     conn.request("POST", "/api/project/{}/graph/nodes".format(self.activeProjectId), json.dumps(req_data),
@@ -505,7 +505,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
     def doSearch(self, query):
         print("in doSearch")
         headers = {"Content-Type": "application/json",
-                   "Cookie": "SESSIONID={}".format(self.cookie)
+                   "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
         data = {"searchString":query}
         conn = httplib.HTTPConnection(self.ServerURL)
@@ -653,7 +653,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         aaa = json.dumps(data)
         # print(aaa)
         headers = {"Content-Type": "application/json",
-                   "Cookie": "SESSIONID={}".format(self.cookie)
+                   "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
         conn = httplib.HTTPConnection(self.ServerURL)
         # conn = httplib.HTTPConnection("127.0.0.1:1337")
@@ -690,7 +690,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
             return
         data = '{{"columnSep":"{}","columns":{},"data":"{}","excludeHeaders":false,"rowSep":"{}"}}'.format(columnSep,json.dumps(columns),data,rowSep)
         headers = {"Content-Type": "application/json",
-                   "Cookie": "SESSIONID={}".format(self.cookie)
+                   "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
         conn = httplib.HTTPConnection(self.ServerURL)
         conn.request("POST", "/api/project/{}/graph/custom/parse".format(self.activeProjectId), data, headers)
@@ -728,7 +728,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         for uri in urllist.keys():
             data.append({"uri": uri})
         headers = {"Content-Type": "application/json",
-                   "Cookie": "SESSIONID={}".format(self.cookie)
+                   "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
         conn = httplib.HTTPConnection(self.ServerURL)
         # conn = httplib.HTTPConnection("127.0.0.1:1337")
@@ -761,7 +761,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         # self.appName.removeAllItems()
         print(self.cookie)
         headers = {"Content-Type": "application/json",
-                   "Cookie": "SESSIONID={}".format(self.cookie)
+                   "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
         conn = httplib.HTTPConnection(self.ServerURL)
         conn.request("GET", "/api/groups/", "" , headers)
@@ -787,7 +787,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         self.appName.removeAllItems()
         print(self.cookie)
         headers = {"Content-Type": "application/json",
-                   "Cookie": "SESSIONID={}".format(self.cookie)
+                   "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
         conn = httplib.HTTPConnection(self.ServerURL)
         conn.request("GET", "/api/groups/", "" , headers)
@@ -826,7 +826,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
 
     def getDataByID(self, nodeID):
         headers = {"Content-Type": "application/json",
-                   "Cookie": "SESSIONID={}".format(self.cookie)
+                   "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
         conn = httplib.HTTPConnection(self.ServerURL)
         conn.request("GET", "/api/project/{}/graph/nodes/{}".format(self.activeProjectId,nodeID),"" , headers)
@@ -847,7 +847,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         # self.appName.removeAllItems()
         # print(self.appsList)
         headers = {"Content-Type": "application/json",
-                   "Cookie": "SESSIONID={}".format(self.cookie)
+                   "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
         conn = httplib.HTTPConnection(self.ServerURL)
         conn.request("GET", "/api/project/{}/graph/apps".format(self.activeProjectId), "", headers)
@@ -872,7 +872,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
     def sendAllIssuesToRepeater(self, event):
         print("sendAllIssuesToRepeater: btn pressed!")
         headers = {"Content-Type": "application/json",
-                   "Cookie": "SESSIONID={}".format(self.cookie)
+                   "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
         conn = httplib.HTTPConnection(self.ServerURL)
         conn.request("GET", "/api/project/{}/graph/issues".format(self.activeProjectId), "", headers)
@@ -941,7 +941,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
             if appParentID:
                 data = [{"name":appName, "appType":type, "nodeId":appParentID}]
                 headers = {"Content-Type": "application/json",
-                           "Cookie": "SESSIONID={}".format(self.cookie)
+                           "Cookie": "BSESSIONID={}".format(self.cookie)
                            }
                 conn = httplib.HTTPConnection(self.ServerURL)
                 conn.request("POST", "/api/project/{}/graph/nodes".format(self.activeProjectId), json.dumps(data),
@@ -956,7 +956,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
                         # link hostname
                         data = [{"hostnameId":appHostID, "appId":appID}]
                         headers = {"Content-Type": "application/json",
-                                   "Cookie": "SESSIONID={}".format(self.cookie)
+                                   "Cookie": "BSESSIONID={}".format(self.cookie)
                                    }
                         conn = httplib.HTTPConnection(self.ServerURL)
                         conn.request("POST", "/api/project/{}/graph/relationships".format(self.activeProjectId),
@@ -998,7 +998,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         self.appName.removeAllItems()
         print(self.cookie)
         headers = {"Content-Type": "application/json",
-                   "Cookie": "SESSIONID={}".format(self.cookie)
+                   "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
         conn = httplib.HTTPConnection(self.ServerURL)
         conn.request("GET", "/api/project/{}/graph/apps".format(self.activeProjectId), "", headers)
@@ -1019,7 +1019,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         # print("ready to post data:")
         # print(json.dumps(data))
         headers = {"Content-Type": "application/json",
-                   "Cookie": "SESSIONID={}".format(self.cookie)
+                   "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
         conn2 = httplib.HTTPConnection(self.ServerURL)
         conn2.request("POST", "/api/project/{}/graph/custom".format(self.activeProjectId), json.dumps(data), headers)
@@ -1039,7 +1039,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         print ("well well well...")
         
         headers = {"Content-Type": "application/json",
-                   "Cookie": "SESSIONID={}".format(self.cookie)
+                   "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
         conn = httplib.HTTPConnection(self.ServerURL)
         conn.request("GET", "/api/project/{}/graph/nodes/{}".format(self.activeProjectId,self.activeApptId),"" , headers)
@@ -1101,7 +1101,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         print(json.dumps(empty_issue_tamplate)) 
         headers =   {
                         "Content-Type": "application/json",
-                        "Cookie": "SESSIONID={}".format(self.cookie)
+                        "Cookie": "BSESSIONID={}".format(self.cookie)
                     }
         conn = httplib.HTTPConnection(self.ServerURL)
         print("workCreateIssueFromMessage: sending request to create issue")
