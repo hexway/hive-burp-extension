@@ -806,7 +806,8 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         print ("Set cookie btn pressed!")
         self.cookie = self.CookieField.getText()
         print(self.cookie)
-        self.textCookieValue.setText(self.cookie)
+        # self.textCookieValue.setText(self.cookie)
+        self.textCookieValue.setText("Cookie is set")
         # self.getProjects()
 
     def setServerURL(self, event):
