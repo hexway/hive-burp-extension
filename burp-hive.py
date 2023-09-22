@@ -1,16 +1,16 @@
-from burp import IBurpExtender, IContextMenuFactory, ITab 
-from burp import IHttpRequestResponse
-from javax import swing
-from java.awt import BorderLayout
-from java.util import ArrayList
-from javax.swing import JMenuItem, JMenu
-from java.net import URL
-import threading
-import httplib
-import struct
 import json
-import sys
 import socket
+import struct
+import threading
+import ssl
+
+import httplib
+from burp import IBurpExtender, IContextMenuFactory, ITab
+from java.awt import BorderLayout
+from java.net import URL
+from java.util import ArrayList
+from javax import swing
+from javax.swing import JMenuItem
 
 class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
 
@@ -42,7 +42,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         CookieOpt.add(swing.Box.createHorizontalStrut(10))
         ## cookie value
         self.CookieField = swing.JTextField("BSESSIONID cookie value",60)
-        self.CookieField = swing.JTextField("06ffe688-fb5c-43f8-97d6-965e2785cf7a",60)
+        self.CookieField = swing.JTextField(".eJw9zsG...",60)
         CookieOpt.add(self.CookieField)
         CookieOpt.add(swing.Box.createHorizontalStrut(10))
         ## SET button
@@ -63,7 +63,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         BoxservURLopt.add(swing.Box.createHorizontalStrut(10))
         ## hostname
         # self.ServerURLField = swing.JTextField("127.0.0.1",60)
-        self.ServerURLField = swing.JTextField("demohive.hexway.io",60)
+        self.ServerURLField = swing.JTextField("https://demohive.hexway.io",60)
         BoxservURLopt.add(self.ServerURLField)
         BoxservURLopt.add(swing.Box.createHorizontalStrut(10))
         ## SET button
@@ -77,6 +77,27 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         boxServOpt.add(BoxservURLopt)
         boxServOpt.add(swing.Box.createVerticalStrut(10))
         # =====Server URL option end====
+
+        # =====Verify SSL option start====
+        CheckSSLOpt = swing.Box.createHorizontalBox()
+        ## Title
+        CheckSSLOpt.add(swing.JLabel("Verify ssl:"))
+        CheckSSLOpt.add(swing.Box.createHorizontalStrut(10))
+        ## Checkbox
+        self.CheckSSLField = swing.JCheckBox("Will ssl connections to ServerURL be verified:", 60)
+        self.CheckSSLField.setSelected(True)
+        self.CheckSSLField.addItemListener(self.setCheckSSL)
+        self.SSLContext = ssl._create_default_https_context()
+        CheckSSLOpt.add(self.CheckSSLField)
+        CheckSSLOpt.add(swing.Box.createHorizontalStrut(10))
+        ## Current value
+        self.textCheckSSL = swing.JLabel(str(self.CheckSSLField.isSelected()))
+        CheckSSLOpt.add(self.textCheckSSL)
+        CheckSSLOpt.add(swing.Box.createHorizontalStrut(10))
+        ## Put all this on the screen
+        boxServOpt.add(CheckSSLOpt)
+        boxServOpt.add(swing.Box.createVerticalStrut(10))
+        # =====Verify SSL option end====
 
         # =====Server projects option start====
         ProjectNameOpt = swing.Box.createHorizontalBox()
@@ -401,7 +422,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
             headers = {"Content-Type": "application/json",
                        "Cookie": "BSESSIONID={}".format(self.cookie)
                        }
-            conn = httplib.HTTPConnection(self.ServerURL)
+            conn = self.HTTPConnection(self.ServerURL)
             conn.request("POST", "/api/project/{}/graph/api".format(self.activeProjectId), json.dumps(issue_target), headers)
             response = conn.getresponse()
             responseStatus = response.status
@@ -423,7 +444,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
                 #     headers = {"Content-Type": "application/json",
                 #                "Cookie": "BSESSIONID={}".format(self.cookie)
                 #                }
-                #     conn = httplib.HTTPConnection(self.ServerURL)
+                #     conn = self.HTTPConnection(self.ServerURL)
                 #     conn.request("POST", "/api/project/{}/graph/nodes".format(self.activeProjectId), json.dumps(req_data),
                 #                  headers)
                 #     response = conn.getresponse()
@@ -469,7 +490,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
             headers = {"Content-Type": "application/json",
                        "Cookie": "BSESSIONID={}".format(self.cookie)
                        }
-            conn = httplib.HTTPConnection(self.ServerURL)
+            conn = self.HTTPConnection(self.ServerURL)
             conn.request("POST", "/api/project/{}/graph/nodes".format(self.activeProjectId), json.dumps(issue_data), headers)
             response = conn.getresponse()
             responseStatus = response.status
@@ -489,7 +510,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
                     headers = {"Content-Type": "application/json",
                                "Cookie": "BSESSIONID={}".format(self.cookie)
                                }
-                    conn = httplib.HTTPConnection(self.ServerURL)
+                    conn = self.HTTPConnection(self.ServerURL)
                     conn.request("POST", "/api/project/{}/graph/nodes".format(self.activeProjectId), json.dumps(req_data),
                                  headers)
                     response = conn.getresponse()
@@ -508,7 +529,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
                    "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
         data = {"searchString":query}
-        conn = httplib.HTTPConnection(self.ServerURL)
+        conn = self.HTTPConnection(self.ServerURL)
         conn.request("POST", "/api/project/{}/graph/search".format(self.activeProjectId), json.dumps(data), headers)
         response = conn.getresponse()
         if response.status == 200:
@@ -655,7 +676,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         headers = {"Content-Type": "application/json",
                    "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
-        conn = httplib.HTTPConnection(self.ServerURL)
+        conn = self.HTTPConnection(self.ServerURL)
         # conn = httplib.HTTPConnection("127.0.0.1:1337")
         # print(json.dumps(data))
         print("ready to send req/resp")
@@ -692,7 +713,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         headers = {"Content-Type": "application/json",
                    "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
-        conn = httplib.HTTPConnection(self.ServerURL)
+        conn = self.HTTPConnection(self.ServerURL)
         conn.request("POST", "/api/project/{}/graph/custom/parse".format(self.activeProjectId), data, headers)
         response = conn.getresponse()
         responseStatus = response.status
@@ -730,7 +751,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         headers = {"Content-Type": "application/json",
                    "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
-        conn = httplib.HTTPConnection(self.ServerURL)
+        conn = self.HTTPConnection(self.ServerURL)
         # conn = httplib.HTTPConnection("127.0.0.1:1337")
         print("Sending URLs")
         conn.request("POST", "/api/project/{}/graph/apps/{}/uris".format(self.activeProjectId,self.activeApptId), json.dumps(data), headers)
@@ -763,7 +784,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         headers = {"Content-Type": "application/json",
                    "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
-        conn = httplib.HTTPConnection(self.ServerURL)
+        conn = self.HTTPConnection(self.ServerURL)
         conn.request("GET", "/api/groups/", "" , headers)
         response = conn.getresponse()
         if response.status == 200:
@@ -789,7 +810,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         headers = {"Content-Type": "application/json",
                    "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
-        conn = httplib.HTTPConnection(self.ServerURL)
+        conn = self.HTTPConnection(self.ServerURL)
         conn.request("GET", "/api/groups/", "" , headers)
         response = conn.getresponse()
         if response.status == 200:
@@ -810,12 +831,48 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         self.textCookieValue.setText("Cookie is set")
         # self.getProjects()
 
+    def HTTPConnection(self, url):
+        if self.ServerScheme == "https":
+            return httplib.HTTPSConnection(
+                self.ServerURL,
+                context = self.SSLContext
+            )
+        else:
+            return httplib.HTTPConnection(self.ServerURL)
+
     def setServerURL(self, event):
         print("Set Server URL btn pressed!")
-        self.ServerURL = self.ServerURLField.getText()
-        print(self.ServerURL)
-        self.textServerURL.setText(self.ServerURL)
+        url = self.ServerURLField.getText().strip("/")
+
+        splitted = url.split("://")
+        if len(splitted) == 1:
+            self.ServerScheme = "http"
+            self.ServerURL = splitted[0]
+        elif len(splitted) == 2:
+            if splitted[0] not in ["http", "https"]:
+                print("Bad url scheme: " + str(splitted[0]))
+                return
+            
+            self.ServerScheme = splitted[0]
+            self.ServerURL = splitted[1]
+        else:
+            print("Bad url: " +  str(url))
+            return
+
+        print(url)
+        self.textServerURL.setText(url)
+
         self.getProjects()
+
+    def setCheckSSL(self, event):
+        state = self.CheckSSLField.isSelected()
+        if state:
+            self.SSLContext = ssl._create_default_https_context()
+        else:
+            self.SSLContext = ssl._create_unverified_context()
+
+        print("CheckSSL switch state changed: " + str(state))
+        self.textCheckSSL.setText(str(state))
 
     def setProject (self, event):
         self.activeProjectId = self.projectName.getSelectedItem().split("~")[1]
@@ -829,7 +886,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         headers = {"Content-Type": "application/json",
                    "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
-        conn = httplib.HTTPConnection(self.ServerURL)
+        conn = self.HTTPConnection(self.ServerURL)
         conn.request("GET", "/api/project/{}/graph/nodes/{}".format(self.activeProjectId,nodeID),"" , headers)
         response = conn.getresponse()
         if response.status == 200:
@@ -850,7 +907,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         headers = {"Content-Type": "application/json",
                    "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
-        conn = httplib.HTTPConnection(self.ServerURL)
+        conn = self.HTTPConnection(self.ServerURL)
         conn.request("GET", "/api/project/{}/graph/apps".format(self.activeProjectId), "", headers)
         response = conn.getresponse()
         # self.appsList={}
@@ -875,7 +932,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         headers = {"Content-Type": "application/json",
                    "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
-        conn = httplib.HTTPConnection(self.ServerURL)
+        conn = self.HTTPConnection(self.ServerURL)
         conn.request("GET", "/api/project/{}/graph/issues".format(self.activeProjectId), "", headers)
         response = conn.getresponse()
         if response.status == 200:
@@ -944,7 +1001,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
                 headers = {"Content-Type": "application/json",
                            "Cookie": "BSESSIONID={}".format(self.cookie)
                            }
-                conn = httplib.HTTPConnection(self.ServerURL)
+                conn = self.HTTPConnection(self.ServerURL)
                 conn.request("POST", "/api/project/{}/graph/nodes".format(self.activeProjectId), json.dumps(data),
                              headers)
                 response = conn.getresponse()
@@ -959,7 +1016,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
                         headers = {"Content-Type": "application/json",
                                    "Cookie": "BSESSIONID={}".format(self.cookie)
                                    }
-                        conn = httplib.HTTPConnection(self.ServerURL)
+                        conn = self.HTTPConnection(self.ServerURL)
                         conn.request("POST", "/api/project/{}/graph/relationships".format(self.activeProjectId),
                                      json.dumps(data),
                                      headers)
@@ -1001,7 +1058,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         headers = {"Content-Type": "application/json",
                    "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
-        conn = httplib.HTTPConnection(self.ServerURL)
+        conn = self.HTTPConnection(self.ServerURL)
         conn.request("GET", "/api/project/{}/graph/apps".format(self.activeProjectId), "", headers)
         response = conn.getresponse()
         if response.status == 200:
@@ -1022,7 +1079,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         headers = {"Content-Type": "application/json",
                    "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
-        conn2 = httplib.HTTPConnection(self.ServerURL)
+        conn2 = self.HTTPConnection(self.ServerURL)
         conn2.request("POST", "/api/project/{}/graph/custom".format(self.activeProjectId), json.dumps(data), headers)
         response = conn2.getresponse()
         if response.status == 200:
@@ -1042,7 +1099,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
         headers = {"Content-Type": "application/json",
                    "Cookie": "BSESSIONID={}".format(self.cookie)
                    }
-        conn = httplib.HTTPConnection(self.ServerURL)
+        conn = self.HTTPConnection(self.ServerURL)
         conn.request("GET", "/api/project/{}/graph/nodes/{}".format(self.activeProjectId,self.activeApptId),"" , headers)
         response = conn.getresponse()
         if response.status == 200:
@@ -1104,7 +1161,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
                         "Content-Type": "application/json",
                         "Cookie": "BSESSIONID={}".format(self.cookie)
                     }
-        conn = httplib.HTTPConnection(self.ServerURL)
+        conn = self.HTTPConnection(self.ServerURL)
         print("workCreateIssueFromMessage: sending request to create issue")
         conn.request(
                         "POST",
@@ -1125,7 +1182,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, ITab):
                             "response":b''.join([self.int_to_bytes(x) for x in resp]).decode('utf-8'),
                             "nodeId":nodeId
                         }]
-                conn = httplib.HTTPConnection(self.ServerURL)
+                conn = self.HTTPConnection(self.ServerURL)
                 conn.request(
                                 "POST", 
                                 "/api/project/{}/graph/nodes".format(self.activeProjectId), 
